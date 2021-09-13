@@ -19,8 +19,7 @@ CREATE TABLE IF NOT EXISTS login_credentials (
   admin_id int REFERENCES admins
   /*need to add account type as well for validation*/ 
 );
-CREATE SCHEMA accountlogs;
-SET SEARCH_PATH to accountlogs;
+
 CREATE TABLE IF NOT EXISTS account_logs (
   log_id serial PRIMARY KEY,
   user_nric char(9),
@@ -28,10 +27,6 @@ CREATE TABLE IF NOT EXISTS account_logs (
   admin_id varchar,
   action_made varchar
 );
-SET SEARCH_PATH to accountlogs,public;
-
-
-
 
 /** Trigger for account status and password_attempts**/
 CREATE OR REPLACE FUNCTION change_account_status() RETURNS TRIGGER
