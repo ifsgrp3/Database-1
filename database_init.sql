@@ -166,7 +166,7 @@ covid19_test_results (
   /** 0 for ART, 1 for PCR **/
   test_result bit,
   /** 1 for positive, 0 for negative **/
-  test_date date default GETDATE(), 
+  test_date date default CURRENT_DATE, 
   test_id SERIAL
   
 );
@@ -177,7 +177,7 @@ health_declaration (
   covid_symptoms bit, 
   /** 1 for symptoms visible, 0 for symptoms not visible **/
   temperature float, 
-  declaration_date date default GETDATE(),
+  declaration_date date default CURRENT_DATE,
   health_declaration_id SERIAL
 );
 
@@ -234,12 +234,12 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 /** 6. add_covid19_result **/
-CREATE OR REPLACE PROCEDURE add_covid19_results(nric char(9), test_result bit, test_date date, covid19_test_type) 
+CREATE OR REPLACE PROCEDURE add_covid19_results(nric char(9), test_result bit, test_date date, covid19_test_type bit) 
 AS $$ 
   DECLARE
     curr_test_id INT;
   BEGIN 
-    INSERT INTO covid19_test_results(nric, test_result test_date, covid19_test_type) VALUES (nric, test_result test_date, covid19_test_type) 
+    INSERT INTO covid19_test_results(nric, test_result, test_date, covid19_test_type) VALUES (nric, test_result, test_date, covid19_test_type) 
     RETURNING test_id INTO curr_test_id;
   END;
 $$ LANGUAGE plpgsql;
