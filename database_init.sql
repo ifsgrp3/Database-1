@@ -256,13 +256,13 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 CREATE TABLE IF NOT EXISTS record_logs (
-  user_nric char PRIMARY KEY,
+  user_nric char(9) PRIMARY KEY,
   date_time TIMESTAMPTZ DEFAULT Now(),/**e.g 2017-03-18 09:41:26.208497+07 **/
   table_affected varchar,
   action_made varchar
 );
 /** Function to add into record logs **/
-CREATE OR REPLACE PROCEDURE add_record_logs(user_nric char,table_affected varchar,action_made varchar)
+CREATE OR REPLACE PROCEDURE add_record_logs(user_nric char(9),table_affected varchar,action_made varchar)
 AS $$
   INSERT INTO  record_logs ( user_nric,table_affected,action_made) Values (user_nric,table_affected,action_made);
 $$ LANGUAGE sql; 
