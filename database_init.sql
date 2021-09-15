@@ -234,12 +234,12 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 /** 6. add_covid19_result **/
-CREATE OR REPLACE PROCEDURE add_covid19_results(nric char(9), test_result bit, test_date date, covid19_test_type bit) 
+CREATE OR REPLACE PROCEDURE add_covid19_results(nric char(9), covid19_test_type bit,  test_result bit, test_date date) 
 AS $$ 
   DECLARE
     curr_test_id INT;
   BEGIN 
-    INSERT INTO covid19_test_results(nric, test_result, test_date, covid19_test_type) VALUES (nric, test_result, test_date, covid19_test_type) 
+    INSERT INTO covid19_test_results(nric, covid19_test_type, test_result, test_date) VALUES (nric,covid19_test_type, test_result, test_date) 
     RETURNING test_id INTO curr_test_id;
   END;
 $$ LANGUAGE plpgsql;
