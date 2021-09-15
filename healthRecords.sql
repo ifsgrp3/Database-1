@@ -20,7 +20,7 @@ user_address (
   zip_code varchar, 
   area varchar,
    /** north, south, east, west, central **/
-  FOREIGN KEY nric references user_particulars (nric) 
+  FOREIGN KEY (nric) references user_particulars (nric) 
 );
 
 CREATE TABLE IF NOT EXISTS 
