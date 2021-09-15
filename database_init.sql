@@ -250,7 +250,7 @@ AS $$
   DECLARE 
     curr_health_declaration_id INT;
   BEGIN
-    INSERT INTO health_declaration (nric, declaration_date, covid_symptoms, temperature) VALUES (nric, declaration_date, covid_symptoms, temperature)
+    INSERT INTO health_declaration (nric, covid_symptoms, temperature) VALUES (nric, covid_symptoms, temperature)
     RETURNING health_declaration INTO curr_health_declaration_id;
   END;
 $$ LANGUAGE plpgsql;
