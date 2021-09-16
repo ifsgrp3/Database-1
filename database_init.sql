@@ -178,10 +178,12 @@ health_declaration (
   nric char(9) PRIMARY KEY, 
   covid_symptoms bit, 
   /** 1 for symptoms visible, 0 for symptoms not visible **/
-  temperature float, 
+  temperature varchar, 
   declaration_date date default CURRENT_DATE,
-  health_declaration_id SERIAL
+  health_declaration_id SERIAL,
+  FOREIGN KEY (nric) references user_particulars (nric) 
 );
+
 
 /** 1. add_user_particulars: **/
 CREATE OR REPLACE PROCEDURE add_user_particulars(nric char(9), first_name varchar, last_name varchar, date_of_birth date, age int, gender bit, race varchar, contact_number varchar)
@@ -246,13 +248,13 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 /** 7. add_health_declaration **/
-CREATE OR REPLACE PROCEDURE add_health_declaration(nric char(9), declaration_date date, covid_symptoms bit, temperature float)
+CREATE OR REPLACE PROCEDURE add_health_declaration(nric char(9), covid_symptoms bit, temperature varchar)
 AS $$ 
   DECLARE 
     curr_health_declaration_id INT;
   BEGIN
     INSERT INTO health_declaration (nric, covid_symptoms, temperature) VALUES (nric, covid_symptoms, temperature)
-    RETURNING health_declaration INTO curr_health_declaration_id;
+    RETURNING health_declaration_id INTO curr_health_declaration_id;
   END;
 $$ LANGUAGE plpgsql;
 
