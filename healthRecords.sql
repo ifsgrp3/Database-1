@@ -31,9 +31,10 @@ vaccination_results (
   vaccine_type varchar,
   /** pfizer, moderna, sinovac **/ 
   vaccination_centre_location varchar, 
-  first_dose_date date, 
+  first_dose_date date , 
   second_dose_date date, 
-  vaccination_certificate_id SERIAL
+  vaccination_certificate_id SERIAL, 
+  FOREIGN KEY (nric) references user_particulars (nric) 
 );
 
 CREATE TABLE IF NOT EXISTS
@@ -43,9 +44,9 @@ covid19_test_results (
   /** 0 for ART, 1 for PCR **/
   test_result bit,
   /** 1 for positive, 0 for negative **/
-  test_date date default GETDATE(), 
-  test_id SERIAL
-  
+  test_date date default CURRENT_DATE, 
+  test_id SERIAL,
+  FOREIGN KEY (nric) references user_particulars (nric) 
 );
 
 CREATE TABLE IF NOT EXISTS 
@@ -54,8 +55,9 @@ health_declaration (
   covid_symptoms bit, 
   /** 1 for symptoms visible, 0 for symptoms not visible **/
   temperature float, 
-  declaration_date date default GETDATE(),
-  health_declaration_id SERIAL
+  declaration_date date default CURRENT_DATE,
+  health_declaration_id SERIAL,
+  FOREIGN KEY (nric) references user_particulars (nric) 
 );
 
 /** 1. add_user_particulars: **/
@@ -111,23 +113,23 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 /** 6. add_covid19_result **/
-CREATE OR REPLACE PROCEDURE add_covid19_results(nric char(9), test_result bit, test_date date, covid19_test_type) 
+CREATE OR REPLACE PROCEDURE add_covid19_results(nric char(9), covid19_test_type bit,  test_result bit) 
 AS $$ 
   DECLARE
     curr_test_id INT;
   BEGIN 
-    INSERT INTO covid19_test_results(nric, test_result test_date, covid19_test_type) VALUES (nric, test_result test_date, covid19_test_type) 
+    INSERT INTO covid19_test_results(nric, covid19_test_type, test_result) VALUES (nric,covid19_test_type, test_result) 
     RETURNING test_id INTO curr_test_id;
   END;
 $$ LANGUAGE plpgsql;
 
 /** 7. add_health_declaration **/
-CREATE OR REPLACE PROCEDURE add_health_declaration(nric char(9), declaration_date date, covid_symptoms bit, temperature float)
+CREATE OR REPLACE PROCEDURE add_health_declaration(nric char(9), covid_symptoms bit, temperature float)
 AS $$ 
   DECLARE 
     curr_health_declaration_id INT;
   BEGIN
-    INSERT INTO health_declaration (nric, declaration_date, covid_symptoms, temperature) VALUES (nric, declaration_date, covid_symptoms, temperature)
+    INSERT INTO health_declaration (nric, covid_symptoms, temperature) VALUES (nric, covid_symptoms, temperature)
     RETURNING health_declaration INTO curr_health_declaration_id;
   END;
 $$ LANGUAGE plpgsql;
