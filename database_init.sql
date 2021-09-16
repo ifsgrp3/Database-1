@@ -135,6 +135,7 @@ user_particulars (
   contact_number varchar
 );
 
+
 CREATE TABLE IF NOT EXISTS 
 user_address (
   nric char(9) PRIMARY KEY, 
@@ -154,9 +155,10 @@ vaccination_results (
   vaccine_type varchar,
   /** pfizer, moderna, sinovac **/ 
   vaccination_centre_location varchar, 
-  first_dose_date date, 
+  first_dose_date date , 
   second_dose_date date, 
-  vaccination_certificate_id SERIAL
+  vaccination_certificate_id SERIAL, 
+  FOREIGN KEY (nric) references user_particulars (nric) 
 );
 
 CREATE TABLE IF NOT EXISTS
@@ -167,8 +169,8 @@ covid19_test_results (
   test_result bit,
   /** 1 for positive, 0 for negative **/
   test_date date default CURRENT_DATE, 
-  test_id SERIAL
-  
+  test_id SERIAL,
+  FOREIGN KEY (nric) references user_particulars (nric) 
 );
 
 CREATE TABLE IF NOT EXISTS 
@@ -198,7 +200,6 @@ AS $$
     WHERE nric = nric;
   END;
 $$ LANGUAGE plpgsql;
-
 
 /** 3. add_user_address **/
 CREATE OR REPLACE PROCEDURE add_user_address(nric char(9), street_name varchar, unit_number varchar, zip_code varchar, area varchar)
