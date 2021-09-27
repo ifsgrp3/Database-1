@@ -259,7 +259,8 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 CREATE TABLE IF NOT EXISTS record_logs (
-  user_nric char(9) PRIMARY KEY,
+  record_id serial PRIMARY KEY,
+  user_nric char(9),
   date_time TIMESTAMPTZ DEFAULT Now(),/**e.g 2017-03-18 09:41:26.208497+07 **/
   table_affected varchar,
   action_made varchar
