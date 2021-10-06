@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS account_logs (
 CREATE OR REPLACE FUNCTION change_account_status() RETURNS TRIGGER
 AS $$
     BEGIN
-      IF (NEW.password_attempts > 10) THEN
+      IF (NEW.password_attempts > 9) THEN
         RAISE NOTICE 'User has exceed max login tries';  
       END IF;
       OLD.account_status := 0;
@@ -48,10 +48,11 @@ FOR EACH ROW EXECUTE FUNCTION change_account_status();
 
 /** Trigger for invalid account, no such NRIC or no account status deactivated**/
 
+
 CREATE OR REPLACE FUNCTION reject_account_change() RETURNS TRIGGER
 AS $$
     BEGIN
-      IF (OLD.account_status = '0') THEN
+      IF (OLD.account_status = '0' AND OLD.password_attempts >9) THEN
         RAISE EXCEPTION 'The account has been deactivated';  
       END IF;
       RETURN NULL;
