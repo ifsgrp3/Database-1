@@ -47,9 +47,8 @@ DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW EXECUTE FUNCTION change_account_status();
 
 /** Trigger for invalid account, no such NRIC or no account status deactivated**/
-
-
-CREATE OR REPLACE FUNCTION reject_account_change() RETURNS TRIGGER
+drop function if exist reject_account_change cascade;
+/**CREATE OR REPLACE FUNCTION reject_account_change() RETURNS TRIGGER
 AS $$
     BEGIN
       IF (OLD.account_status = '0' AND OLD.password_attempts >9) THEN
@@ -59,11 +58,10 @@ AS $$
     END;
 $$ LANGUAGE plpgsql;
 
-/**cannot use before??**/
 CREATE CONSTRAINT TRIGGER invalid_account_type
 AFTER UPDATE ON login_credentials
 DEFERRABLE INITIALLY DEFERRED
-FOR EACH ROW EXECUTE FUNCTION reject_account_change();
+FOR EACH ROW EXECUTE FUNCTION reject_account_change();**/
 
 
 /** Function for admin to add accounts **/
