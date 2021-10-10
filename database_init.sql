@@ -47,7 +47,7 @@ DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW EXECUTE FUNCTION change_account_status();
 
 /** Trigger for invalid account, no such NRIC or no account status deactivated**/
-drop function if exist reject_account_change cascade;
+drop function if exists reject_account_change cascade;
 /**CREATE OR REPLACE FUNCTION reject_account_change() RETURNS TRIGGER
 AS $$
     BEGIN
