@@ -99,8 +99,8 @@ $$ LANGUAGE sql;
 CREATE OR REPLACE PROCEDURE update_user_ble(update_nric char(9),old_ble_serial_number varchar(64), new_ble_serial_number varchar(64) )
 AS $$
   UPDATE login_credentials
-  SET ble_serial_number = new_ble_serial_number varchar
-  WHERE nric = update_nric AND  ble_serial_number = old_ble_serial_number varchar;
+  SET ble_serial_number = new_ble_serial_number 
+  WHERE nric = update_nric AND  ble_serial_number = old_ble_serial_number;
 $$ LANGUAGE sql;
 
 /** Update user role **/
