@@ -87,6 +87,30 @@ AS $$
   WHERE nric = update_nric;
 $$ LANGUAGE sql;
 
+ /**Update user password**/
+CREATE OR REPLACE PROCEDURE update_user_password(update_nric char(9),old_hashed_password varchar(64), new_hashed_password varchar(64) )
+AS $$
+  UPDATE login_credentials
+  SET hashed_password = new_hashed_password
+  WHERE nric = update_nric AND  hashed_password = old_hashed_password;
+$$ LANGUAGE sql;
+
+/** Update user ble_serial_number**/
+CREATE OR REPLACE PROCEDURE update_user_ble(update_nric char(9),old_ble_serial_number varchar(64), new_ble_serial_number varchar(64) )
+AS $$
+  UPDATE login_credentials
+  SET ble_serial_number = new_ble_serial_number varchar
+  WHERE nric = update_nric AND  ble_serial_number = old_ble_serial_number varchar;
+$$ LANGUAGE sql;
+
+/** Update user role **/
+CREATE OR REPLACE PROCEDURE update_user_password(update_nric char(9), new_account_role int )
+AS $$
+  UPDATE login_credentials
+  SET account_role = new_account_role
+  WHERE nric = update_nric;
+$$ LANGUAGE sql;
+
 /** Function to add into account logs **/
 CREATE OR REPLACE PROCEDURE add_account_logs(user_nric char(9), admin_id varchar,action_made varchar)
 AS $$
