@@ -294,7 +294,7 @@ CREATE OR REPLACE PROCEDURE delete_older_health_declaration()
 AS $$
   BEGIN
     DELETE from health_declaration 
-    WHERE declaration_datetime < NOW() - INTERVAL 30 DAY;
+    WHERE declaration_datetime < NOW() - INTERVAL '30 DAY';
   END;
 $$ LANGUAGE plpgsql;
 
