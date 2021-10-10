@@ -178,7 +178,7 @@ health_declaration (
   covid_symptoms bit, 
   /** 1 for symptoms visible, 0 for symptoms not visible **/
   temperature varchar, 
-  declaration_date date default CURRENT_DATE,
+  declaration_date datetime default CURRENT_TIMESTAMP,
   health_declaration_id SERIAL,
   FOREIGN KEY (nric) references user_particulars (nric) 
 );
@@ -192,17 +192,28 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 2. update_contact_number **/
-CREATE OR REPLACE PROCEDURE update_contact_number(nric char(9), new_contact_number varchar)
+/** 2. update_user_first_last_name **/
+CREATE OR REPLACE PROCEDURE update_user_first_last_name(curr_nric char(9), new_last_name varchar, new_first_name varchar)
+AS $$
+  BEGIN 
+    UPDATE user_particulars
+    SET last_name = new_last_name, 
+    first_name = new_first_name
+    WHERE nric = curr_nric;
+  END;
+$$ LANGUAGE plpgsql; 
+
+/** 3. update_contact_number **/
+CREATE OR REPLACE PROCEDURE update_contact_number(curr_nric char(9), new_contact_number varchar)
 AS $$
   BEGIN
     UPDATE user_particulars
     SET contact_number = new_contact_number
-    WHERE nric = nric;
+    WHERE nric = curr_nric;
   END;
 $$ LANGUAGE plpgsql;
 
-/** 3. add_user_address **/
+/** 4. add_user_address **/
 CREATE OR REPLACE PROCEDURE add_user_address(nric char(9), street_name varchar, unit_number varchar, zip_code varchar, area varchar)
 AS $$
   BEGIN
@@ -210,8 +221,8 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 4. update_address **/
-CREATE OR REPLACE PROCEDURE update_address(nric char(9), new_street_name varchar, new_unit_number varchar, new_zip_code varchar, new_area varchar)
+/** 5. update_address **/
+CREATE OR REPLACE PROCEDURE update_address(curr_nric char(9), new_street_name varchar, new_unit_number varchar, new_zip_code varchar, new_area varchar)
 AS $$ 
   BEGIN
     UPDATE user_address
@@ -220,11 +231,11 @@ AS $$
       unit_number = new_unit_number, 
       zip_code = new_zip_code, 
       area = new_area
-    WHERE nric = nric;
+    WHERE nric = curr_nric;
   END;
 $$ LANGUAGE plpgsql;
 
-/** 5. add_vaccination_results **/
+/** 6. add_vaccination_results **/
 CREATE OR REPLACE PROCEDURE add_vaccination_results(nric char(9), vaccination_status int, vaccine_type varchar, vaccination_centre_location varchar, first_dose_date date, second_dose_date date)
 AS $$
   DECLARE 
@@ -235,7 +246,28 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 6. add_covid19_result **/
+/** 7. update_vaccination_status_to_partially**/
+CREATE OR REPLACE PROCEDURE update_vaccination_status_to_partially(curr_nric char(9), vaccination_status int)
+AS $$
+  BEGIN
+    UPDATE vaccination_results
+    SET vaccination_status = 1
+    WHERE nric = curr_nric;
+  END;
+$$ LANGUAGE plpgsql;
+
+/** 8. update_vaccination_status_to_fully**/
+CREATE OR REPLACE PROCEDURE update_vaccination_status_to_fully(curr_nric char(9), vaccination_status int)
+AS $$
+  BEGIN
+    UPDATE vaccination_results
+    SET vaccination_status = 2
+    WHERE nric = curr_nric;
+  END;
+$$ LANGUAGE plpgsql;
+
+
+/** 9. add_covid19_result **/
 CREATE OR REPLACE PROCEDURE add_covid19_results(nric char(9), covid19_test_type bit,  test_result bit) 
 AS $$ 
   DECLARE
@@ -246,7 +278,7 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 7. add_health_declaration **/
+/** 10. add_health_declaration **/
 CREATE OR REPLACE PROCEDURE add_health_declaration(nric char(9), covid_symptoms bit, temperature varchar)
 AS $$ 
   DECLARE 
@@ -256,6 +288,31 @@ AS $$
     RETURNING health_declaration_id INTO curr_health_declaration_id;
   END;
 $$ LANGUAGE plpgsql;
+
+/** 11. delete_older_health_declaration **/
+CREATE OR REPLACE PROCEDURE delete_older_health_declaration()
+AS $$
+  BEGIN
+    DELETE from health_declaration 
+    WHERE declaration_datetime < NOW() - INTERVAL 30 DAY;
+  END;
+$$ LANGUAGE plpgsql;
+
+/** 12. add_new_registration **/
+CREATE OR REPLACE PROCEDURE 
+add_new_registration(nric char(9), first_name varchar, last_name varchar, date_of_birth date, age int, gender bit, race varchar, contact_number varchar, street_name varchar, unit_number varchar, zip_code varchar, area varchar, vaccination_status int, vaccine_type varchar, vaccination_centre_location varchar, first_dose_date date, second_dose_date date) 
+AS $$
+  DECLARE
+    curr_vaccination_certificate_id INT;
+  BEGIN
+    INSERT INTO user_particulars (nric, first_name, last_name, date_of_birth, age, gender, race, contact_number) VALUES (nric, first_name, last_name, date_of_birth, age, gender, race, contact_number);
+
+    INSERT INTO user_address (nric, street_name, unit_number, zip_code, area) VALUES (nric, street_name, unit_number, zip_code, area);
+
+    INSERT INTO vaccination_results (nric, vaccination_status, vaccine_type, vaccination_centre_location, first_dose_date, second_dose_date) VALUES (nric, 0, null, null, null, null) RETURNING vaccination_certificate_id as curr_vaccination_certificate_id;
+  END;
+$$ LANGUAGE plpgsql;
+
 
 CREATE TABLE IF NOT EXISTS record_logs (
   record_id serial PRIMARY KEY,
