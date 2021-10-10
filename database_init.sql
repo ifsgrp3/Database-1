@@ -178,7 +178,7 @@ health_declaration (
   covid_symptoms bit, 
   /** 1 for symptoms visible, 0 for symptoms not visible **/
   temperature varchar, 
-  declaration_date datetime default CURRENT_TIMESTAMP,
+  declaration_date TIMESTAMPTZ default CURRENT_TIMESTAMP,
   health_declaration_id SERIAL,
   FOREIGN KEY (nric) references user_particulars (nric) 
 );
