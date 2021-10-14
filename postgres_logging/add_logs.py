@@ -5,7 +5,6 @@ import sys
 from psycopg2 import OperationalError, errorcodes, errors
 import subprocess
 
-
 def show_psycopg2_exception(err):
     # get details about the exception
     err_type, err_obj, traceback = sys.exc_info()
