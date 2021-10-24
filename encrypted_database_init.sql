@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS login_credentials (
   ble_serial_number varchar, 
   account_status varchar default "1",
   /** Boolean use 1, 0, or NULL**/
-  account_role varchar,
+  account_role varchar
   /** 1 for admin, 2 for cp, 3 for user**/
 );
 
