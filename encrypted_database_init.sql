@@ -148,7 +148,7 @@ user_address (
   zip_code varchar, 
   area varchar,
    /** north, south, east, west, central **/
-  FOREIGN KEY (nric) references user_particulars (nric) 
+  FOREIGN KEY (nric) references user_particulars (nric) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS 
@@ -162,7 +162,7 @@ vaccination_results (
   first_dose_date varchar , 
   second_dose_date varchar, 
   vaccination_certificate_id SERIAL, 
-  FOREIGN KEY (nric) references user_particulars (nric) 
+  FOREIGN KEY (nric) references user_particulars (nric) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS
@@ -174,7 +174,7 @@ covid19_test_results (
   /** 1 for positive, 0 for negative **/
   test_date varchar default CURRENT_DATE, 
   test_id SERIAL,
-  FOREIGN KEY (nric) references user_particulars (nric) 
+  FOREIGN KEY (nric) references user_particulars (nric) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS 
@@ -185,7 +185,7 @@ health_declaration (
   temperature varchar, 
   declaration_date varchar default CURRENT_TIMESTAMP,
   health_declaration_id SERIAL,
-  FOREIGN KEY (nric) references user_particulars (nric) 
+  FOREIGN KEY (nric) references user_particulars (nric) ON DELETE CASCADE
 );
 
 
@@ -227,7 +227,15 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 4. add_user_address **/
+/** 4. remove_user_particulars **/
+CREATE OR REPLACE PROCEDURE remove_user_particulars(curr_nric char(9))
+AS $$ 
+  BEGIN 
+    DELETE FROM user_particulars where nric = curr_nric;
+  END;
+$$ LANGUAGE plpgsql;
+
+/** 5. add_user_address **/
 CREATE OR REPLACE PROCEDURE add_user_address(nric char(9), street_name varchar, unit_number varchar, zip_code varchar, area varchar)
 AS $$
   BEGIN
@@ -240,7 +248,7 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 5. update_address **/
+/** 6. update_address **/
 CREATE OR REPLACE PROCEDURE update_address(curr_nric char(9), new_street_name varchar, new_unit_number varchar, new_zip_code varchar, new_area varchar)
 AS $$ 
   BEGIN
@@ -253,7 +261,7 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 6. add_vaccination_results **/
+/** 7. add_vaccination_results **/
 CREATE OR REPLACE PROCEDURE add_vaccination_results(nric char(9), vaccination_status varchar, vaccine_type varchar, vaccination_centre_location varchar, first_dose_date varchar, second_dose_date varchar)
 AS $$
   DECLARE 
@@ -270,7 +278,7 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 7. update_vaccination_status_to_partially**/
+/** 8. update_vaccination_status_to_partially**/
 CREATE OR REPLACE PROCEDURE update_vaccination_status_to_partially(curr_nric char(9))
 AS $$
   BEGIN
@@ -280,7 +288,7 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 8. update_vaccination_status_to_fully**/
+/** 9. update_vaccination_status_to_fully**/
 CREATE OR REPLACE PROCEDURE update_vaccination_status_to_fully(curr_nric char(9))
 AS $$
   BEGIN
@@ -291,7 +299,7 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 
-/** 9. add_covid19_result **/
+/** 10. add_covid19_result **/
 CREATE OR REPLACE PROCEDURE add_covid19_results(nric char(9), covid19_test_type varchar,  test_result varchar) 
 AS $$ 
   DECLARE
@@ -305,7 +313,7 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 10. add_health_declaration **/
+/** 11. add_health_declaration **/
 CREATE OR REPLACE PROCEDURE add_health_declaration(nric char(9), covid_symptoms varchar, temperature varchar)
 AS $$ 
   DECLARE 
@@ -319,7 +327,7 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 11. delete_older_health_declaration **/
+/** 12. delete_older_health_declaration **/
 CREATE OR REPLACE PROCEDURE delete_older_health_declaration()
 AS $$
   BEGIN
@@ -328,7 +336,7 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** 12. add_new_registration **/
+/** 13. add_new_registration **/
 CREATE OR REPLACE PROCEDURE 
 add_new_registration(nric char(9), first_name varchar, last_name varchar, date_of_birth varchar, age varchar, gender varchar, race varchar, contact_number varchar, street_name varchar, unit_number varchar, zip_code varchar, area varchar, vaccination_status varchar, vaccine_type varchar, vaccination_centre_location varchar, first_dose_date varchar, second_dose_date varchar) 
 AS $$
