@@ -1,5 +1,5 @@
 CREATE DATABASE credentials_encrypted;
-\c credentials;
+\c credentials_encrypted;
 SET TIMEZONE='Singapore';
 begin;
 
