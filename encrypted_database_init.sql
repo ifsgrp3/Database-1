@@ -7,9 +7,9 @@ CREATE TABLE IF NOT EXISTS login_credentials (
   nric char(9) PRIMARY KEY,
   hashed_password varchar NOT NULL,
   user_salt varchar, 
-  password_attempts varchar default "0",
+  password_attempts varchar default '0',
   ble_serial_number varchar, 
-  account_status varchar default "1",
+  account_status varchar default '1',
   /** Boolean use 1, 0, or NULL**/
   account_role varchar
   /** 1 for admin, 2 for cp, 3 for user**/
@@ -40,15 +40,17 @@ DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW EXECUTE FUNCTION change_account_status();
 
 /** Function for admin to add accounts **/
-CREATE OR REPLACE PROCEDURE add_user(nric char(9), hashed_password varchar, user_salt varchar, ble_serial_number varchar,account_role varchar,admin_id varchar)
+CREATE OR REPLACE PROCEDURE add_user(nric char(9), hashed_password varchar, user_salt varchar, ble_serial_number varchar,account_role varchar)
 AS $$
-  INSERT INTO login_credentials (nric, hashed_password, user_salt,ble_serial_number,account_role,admin_id) Values 
+  BEGIN
+  INSERT INTO login_credentials (nric, hashed_password, user_salt,ble_serial_number,account_role) Values 
 	(nric, 
 	pgp_sym_encrypt(hashed_password, 'mysecretkey'),  
 	pgp_sym_encrypt(user_salt, 'mysecretkey'),
  	pgp_sym_encrypt(ble_serial_number, 'mysecretkey'),
  	pgp_sym_encrypt(account_role, 'mysecretkey'));
-$$ LANGUAGE sql;   
+  END;
+$$ LANGUAGE plpgsql;
 
 /** Function for admin to reset password attempts **/
 CREATE OR REPLACE PROCEDURE reset_attempts(update_nric char(9))
