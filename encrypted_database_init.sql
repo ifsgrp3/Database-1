@@ -2,32 +2,25 @@ CREATE DATABASE credentials;
 \c credentials;
 SET TIMEZONE='Singapore';
 begin;
-CREATE TABLE IF NOT EXISTS admins(
-  admin_id int PRIMARY KEY
-);
-insert into admins(admin_id) values (0),(1),(2),(3),(4);
+
 CREATE TABLE IF NOT EXISTS login_credentials (
   nric char(9) PRIMARY KEY,
-  hashed_password varchar(64) NOT NULL,
-  user_salt varchar(32), 
-  password_attempts int default 0,
-  ble_serial_number varchar(64), 
-  account_status bit default '1',
+  hashed_password varchar NOT NULL,
+  user_salt varchar, 
+  password_attempts varchar default "0",
+  ble_serial_number varchar, 
+  account_status varchar default "1",
   /** Boolean use 1, 0, or NULL**/
-  account_role int,
+  account_role varchar,
   /** 1 for admin, 2 for cp, 3 for user**/
-  admin_id int REFERENCES admins 
 );
 
 CREATE TABLE IF NOT EXISTS account_logs (
   log_id serial PRIMARY KEY,
   user_nric char(9),
   date_time TIMESTAMPTZ DEFAULT Now(),
-  admin_id varchar,
   action_made varchar
 );
-
-
 
 /** Trigger for account status and password_attempts**/
 CREATE OR REPLACE FUNCTION change_account_status() RETURNS TRIGGER
@@ -46,35 +39,22 @@ AFTER UPDATE OR INSERT ON login_credentials
 DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW EXECUTE FUNCTION change_account_status();
 
-/** Trigger for invalid account, no such NRIC or no account status deactivated**/
-drop function if exists reject_account_change cascade;
-/**CREATE OR REPLACE FUNCTION reject_account_change() RETURNS TRIGGER
-AS $$
-    BEGIN
-      IF (OLD.account_status = '0' AND OLD.password_attempts >9) THEN
-        RAISE EXCEPTION 'The account has been deactivated';  
-      END IF;
-      RETURN NULL;
-    END;
-$$ LANGUAGE plpgsql;
-CREATE CONSTRAINT TRIGGER invalid_account_type
-AFTER UPDATE ON login_credentials
-DEFERRABLE INITIALLY DEFERRED
-FOR EACH ROW EXECUTE FUNCTION reject_account_change();**/
-
-
 /** Function for admin to add accounts **/
-CREATE OR REPLACE PROCEDURE add_user(nric char(9), hashed_password varchar, user_salt varchar, ble_serial_number varchar,account_role int,admin_id int)
+CREATE OR REPLACE PROCEDURE add_user(nric char(9), hashed_password varchar, user_salt varchar, ble_serial_number varchar,account_role varchar,admin_id varchar)
 AS $$
-  INSERT INTO login_credentials (nric, hashed_password, user_salt,ble_serial_number,account_role,admin_id) Values (nric, hashed_password, user_salt,ble_serial_number,account_role,admin_id);
-$$ LANGUAGE sql;      
-
+  INSERT INTO login_credentials (nric, hashed_password, user_salt,ble_serial_number,account_role,admin_id) Values 
+	(nric, 
+	pgp_sym_encrypt(hashed_password, 'mysecretkey'),  
+	pgp_sym_encrypt(user_salt, 'mysecretkey'),
+ 	pgp_sym_encrypt(ble_serial_number, 'mysecretkey'),
+ 	pgp_sym_encrypt(account_role, 'mysecretkey'));
+$$ LANGUAGE sql;   
 
 /** Function for admin to reset password attempts **/
 CREATE OR REPLACE PROCEDURE reset_attempts(update_nric char(9))
 AS $$
   UPDATE login_credentials
-  SET password_attempts = 0
+  SET password_attempts = pgp_sym_encrypt("0",'mysecretkey')
   WHERE nric = update_nric;
 $$ LANGUAGE sql;
 
@@ -82,49 +62,49 @@ $$ LANGUAGE sql;
 CREATE OR REPLACE PROCEDURE deactivate_account(update_nric char(9))
 AS $$
   UPDATE login_credentials
-  SET account_status = '0'
+  SET account_status = pgp_sym_encrypt("0",'mysecretkey')
   WHERE nric = update_nric;
 $$ LANGUAGE sql;
 
  /**Update user password**/
-CREATE OR REPLACE PROCEDURE update_user_password(update_nric char(9),old_hashed_password varchar(64), new_hashed_password varchar(64) )
+CREATE OR REPLACE PROCEDURE update_user_password(update_nric char(9),old_hashed_password varchar, new_hashed_password varchar )
 AS $$
   UPDATE login_credentials
-  SET hashed_password = new_hashed_password
-  WHERE nric = update_nric AND  hashed_password = old_hashed_password;
+  SET hashed_password = pgp_sym_encrypt(new_hashed_password,'mysecretkey')
+  WHERE nric = update_nric AND  hashed_password = pgp_sym_decrypt(old_hashed_password::bytea, 'mysecretkey'); 
 $$ LANGUAGE sql;
 
-/** Update user ble_serial_number**/
-CREATE OR REPLACE PROCEDURE update_user_ble(update_nric char(9),old_ble_serial_number varchar(64), new_ble_serial_number varchar(64) )
+CREATE OR REPLACE PROCEDURE update_user_ble(update_nric char(9),old_ble_serial_number varchar, new_ble_serial_number varchar )
 AS $$
   UPDATE login_credentials
-  SET ble_serial_number = new_ble_serial_number 
-  WHERE nric = update_nric AND  ble_serial_number = old_ble_serial_number;
+  SET ble_serial_number = pgp_sym_encrypt(new_ble_serial_number ,'mysecretkey')
+  WHERE nric = update_nric AND  ble_serial_number = pgp_sym_decrypt(old_ble_serial_number::bytea, 'mysecretkey'); 
+ 
 $$ LANGUAGE sql;
 
 /** Update user role **/
-CREATE OR REPLACE PROCEDURE update_user_password(update_nric char(9), new_account_role int )
+CREATE OR REPLACE PROCEDURE update_user_password(update_nric char(9), new_account_role varchar )
 AS $$
   UPDATE login_credentials
-  SET account_role = new_account_role
+  SET account_role = pgp_sym_encrypt(new_account_role,'mysecretkey')
   WHERE nric = update_nric;
 $$ LANGUAGE sql;
 
 /** Function to add into account logs **/
-CREATE OR REPLACE PROCEDURE add_account_logs(user_nric char(9), admin_id varchar,action_made varchar)
+CREATE OR REPLACE PROCEDURE add_account_logs(user_nric char(9),action_made varchar)
 AS $$
-  INSERT INTO account_logs ( user_nric,admin_id,action_made) Values (user_nric,admin_id,action_made);
+  INSERT INTO account_logs ( user_nric,action_made) Values (user_nric,action_made);
 $$ LANGUAGE sql; 
 
 /** Trigger to add into account logs **/
 CREATE OR REPLACE FUNCTION account_log_func() RETURNS TRIGGER AS $$
 BEGIN
 IF (TG_OP = 'INSERT') THEN
-  INSERT INTO account_logs ( user_nric,admin_id,action_made) Values (NEW.nric,NEW.admin_id,'CREATE');
+  INSERT INTO account_logs ( user_nric,action_made) Values (NEW.nric,'CREATE');
 ELSEIF (TG_OP = 'DELETE') THEN
-  INSERT INTO account_logs ( user_nric,admin_id,action_made) Values (OLD.nric,NEW.admin_id,'DELETE');
+  INSERT INTO account_logs ( user_nric,action_made) Values (OLD.nric,'DELETE');
 ELSIF (TG_OP = 'UPDATE') THEN
-  INSERT INTO account_logs ( user_nric,admin_id,action_made) Values (NEW.nric,NEW.admin_id,'UPDATE');
+  INSERT INTO account_logs ( user_nric,action_made) Values (NEW.nric,'UPDATE');
 END IF;
 RETURN NULL;
 END;
