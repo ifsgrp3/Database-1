@@ -1,4 +1,4 @@
-CREATE DATABASE credentials;
+CREATE DATABASE credentials_encrypted;
 \c credentials;
 SET TIMEZONE='Singapore';
 begin;
