@@ -66,7 +66,7 @@ AS $$
   BEGIN
   INSERT INTO login_credentials (nric, hashed_password, user_salt,ble_serial_number,account_role) Values 
 	(nric, 
-	pgp_sym_encrypt(hashed_password, 'mysecretkey'),  
+	hashed_password,  
 	pgp_sym_encrypt(user_salt, 'mysecretkey'),
  	pgp_sym_encrypt(ble_serial_number, 'mysecretkey'),
  	pgp_sym_encrypt(account_role, 'mysecretkey'));
