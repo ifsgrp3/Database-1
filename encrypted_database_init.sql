@@ -8,13 +8,13 @@ begin;
 
 CREATE TABLE IF NOT EXISTS login_credentials (
   nric char(9) PRIMARY KEY,
-  hashed_password varchar NOT NULL,
-  user_salt varchar, 
+  hashed_password varchar NOT NULL, /**encrypted**/
+  user_salt varchar, /**encrypted**/
   password_attempts varchar default '0',
-  ble_serial_number varchar, 
+  ble_serial_number varchar, /**encrypted**/
   account_status varchar default '1',
   /** Boolean use 1, 0, or NULL**/
-  account_role varchar
+  account_role varchar /**encrypted**/
   /** 1 for admin, 2 for cp, 3 for user**/
 );
 
