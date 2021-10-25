@@ -61,17 +61,17 @@ DEFERRABLE INITIALLY DEFERRED
 FOR EACH ROW EXECUTE FUNCTION change_account_status();
 
 /** Function for admin to add accounts **/
-CREATE OR REPLACE PROCEDURE add_user(nric char(9), hashed_password varchar, user_salt varchar, ble_serial_number varchar,account_role varchar)
+CREATE OR REPLACE PROCEDURE add_user(nric char(9), hashed_password varchar, user_salt varchar, ble_serial_number varchar, account_role varchar)
 AS $$
   BEGIN
-  INSERT INTO login_credentials (nric, hashed_password, user_salt,ble_serial_number,account_role) Values 
-	(nric, 
-	hashed_password,  
-	pgp_sym_encrypt(user_salt, 'mysecretkey'),
- 	pgp_sym_encrypt(ble_serial_number, 'mysecretkey'),
- 	pgp_sym_encrypt(account_role, 'mysecretkey'));
+    INSERT INTO login_credentials (nric, hashed_password, user_salt, ble_serial_number,account_role) VALUES 
+      (nric, hashed_password,  
+	    pgp_sym_encrypt(user_salt, 'mysecretkey'),
+ 	    pgp_sym_encrypt(ble_serial_number, 'mysecretkey'),
+ 	    pgp_sym_encrypt(account_role, 'mysecretkey'));
   END;
 $$ LANGUAGE plpgsql;
+
 
 
 
