@@ -4,6 +4,8 @@ SET TIMEZONE='Singapore';
 CREATE EXTENSION pgcrypto;
 begin;
 
+
+
 CREATE TABLE IF NOT EXISTS login_credentials (
   nric char(9) PRIMARY KEY,
   hashed_password varchar NOT NULL,
@@ -22,6 +24,24 @@ CREATE TABLE IF NOT EXISTS account_logs (
   date_time TIMESTAMPTZ DEFAULT Now(),
   action_made varchar
 );
+
+CREATE TABLE IF NOT EXISTS online_users(
+	nric char(9) references login_credentials (nric)
+);
+
+/** Function to add online users **/
+CREATE OR REPLACE PROCEDURE add_online_user(new_nric char(9))
+AS $$
+  INSERT INTO  online_users (nric) VALUES (new_nric);
+$$ LANGUAGE sql;
+
+
+/** Function to delete online users **/
+CREATE OR REPLACE PROCEDURE delete_online_user(new_nric char(9))
+AS $$
+  DELETE FROM online_users
+  WHERE online_users.nric = new_nric;
+$$ LANGUAGE sql;
 
 /** Trigger for account status and password_attempts**/
 CREATE OR REPLACE FUNCTION change_account_status() RETURNS TRIGGER
