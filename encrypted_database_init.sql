@@ -1,6 +1,7 @@
 CREATE DATABASE credentials_encrypted;
 \c credentials_encrypted;
 SET TIMEZONE='Singapore';
+CREATE EXTENSION pgcrypto;
 begin;
 
 CREATE TABLE IF NOT EXISTS login_credentials (
@@ -29,7 +30,7 @@ AS $$
       IF (NEW.password_attempts > 9) THEN
         RAISE NOTICE 'User has exceed max login tries';  
       END IF;
-      OLD.account_status := 0;
+      OLD.account_status := pgp_sym_encrypt('0','mysecretkey');
       RETURN NEW;
     END;
 $$ LANGUAGE plpgsql;
@@ -52,19 +53,13 @@ AS $$
   END;
 $$ LANGUAGE plpgsql;
 
-/** Function for admin to reset password attempts **/
-CREATE OR REPLACE PROCEDURE reset_attempts(update_nric char(9))
-AS $$
-  UPDATE login_credentials
-  SET password_attempts = pgp_sym_encrypt("0",'mysecretkey')
-  WHERE nric = update_nric;
-$$ LANGUAGE sql;
+
 
 /** Function for admin to deactivate account **/
 CREATE OR REPLACE PROCEDURE deactivate_account(update_nric char(9))
 AS $$
   UPDATE login_credentials
-  SET account_status = pgp_sym_encrypt("0",'mysecretkey')
+  SET account_status = pgp_sym_encrypt('0','mysecretkey')
   WHERE nric = update_nric;
 $$ LANGUAGE sql;
 
