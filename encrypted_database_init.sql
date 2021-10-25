@@ -47,7 +47,7 @@ $$ LANGUAGE sql;
 CREATE OR REPLACE FUNCTION change_account_status() RETURNS TRIGGER
 AS $$
     BEGIN
-      IF (NEW.password_attempts > 9) THEN
+      IF (NEW.password_attempts > '9') THEN
         RAISE NOTICE 'User has exceed max login tries';  
       END IF;
       OLD.account_status := pgp_sym_encrypt('0','mysecretkey');
