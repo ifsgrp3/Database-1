@@ -138,6 +138,7 @@ END;
 CREATE DATABASE healthrecords;
 \c healthrecords;
 SET TIMEZONE='Singapore';
+CREATE EXTENSION pgcrypto;
 
 begin;
 CREATE TABLE IF NOT EXISTS
