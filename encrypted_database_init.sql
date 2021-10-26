@@ -135,8 +135,8 @@ END;
 /***********************************************************************************************************************************************************************
 ********************************************************************************Health Record Database*****************************************************************/
 
-CREATE DATABASE healthrecords;
-\c healthrecords;
+CREATE DATABASE healthrecord_encrypted;
+\c healthrecord_encrypted;
 SET TIMEZONE='Singapore';
 CREATE EXTENSION pgcrypto;
 
