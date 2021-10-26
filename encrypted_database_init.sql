@@ -84,23 +84,23 @@ AS $$
 $$ LANGUAGE sql;
 
  /**Update user password**/
-CREATE OR REPLACE PROCEDURE update_user_password(update_nric char(9),old_hashed_password varchar, new_hashed_password varchar )
+CREATE OR REPLACE PROCEDURE update_user_password(update_nric char(9), new_hashed_password varchar )
 AS $$
   UPDATE login_credentials
   SET hashed_password = pgp_sym_encrypt(new_hashed_password,'mysecretkey')
-  WHERE nric = update_nric AND  hashed_password = pgp_sym_decrypt(old_hashed_password::bytea, 'mysecretkey'); 
+  WHERE nric = update_nric; 
 $$ LANGUAGE sql;
 
-CREATE OR REPLACE PROCEDURE update_user_ble(update_nric char(9),old_ble_serial_number varchar, new_ble_serial_number varchar )
+CREATE OR REPLACE PROCEDURE update_user_ble(update_nric char(9), new_ble_serial_number varchar )
 AS $$
   UPDATE login_credentials
   SET ble_serial_number = pgp_sym_encrypt(new_ble_serial_number ,'mysecretkey')
-  WHERE nric = update_nric AND  ble_serial_number = pgp_sym_decrypt(old_ble_serial_number::bytea, 'mysecretkey'); 
+  WHERE nric = update_nric; 
  
 $$ LANGUAGE sql;
 
 /** Update user role **/
-CREATE OR REPLACE PROCEDURE update_user_password(update_nric char(9), new_account_role varchar )
+CREATE OR REPLACE PROCEDURE update_user_role(update_nric char(9), new_account_role varchar )
 AS $$
   UPDATE login_credentials
   SET account_role = pgp_sym_encrypt(new_account_role,'mysecretkey')
