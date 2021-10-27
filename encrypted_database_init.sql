@@ -183,24 +183,24 @@ vaccination_results (
 
 CREATE TABLE IF NOT EXISTS
 covid19_test_results (
-  nric char(9) PRIMARY KEY,
+  nric char(9) ,
   covid19_test_type varchar,  
   /** 0 for ART, 1 for PCR **/
   test_result varchar,
   /** 1 for positive, 0 for negative **/
   test_date varchar default CURRENT_DATE, 
-  test_id SERIAL,
+  test_id SERIAL PRIMARY KEY,
   FOREIGN KEY (nric) references user_particulars (nric) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS 
 health_declaration (
-  nric char(9) PRIMARY KEY, 
+  nric char(9), 
   covid_symptoms varchar, 
   /** 1 for symptoms visible, 0 for symptoms not visible **/
   temperature varchar, 
   declaration_date varchar default CURRENT_TIMESTAMP,
-  health_declaration_id SERIAL,
+  health_declaration_id SERIAL PRIMARY KEY,
   FOREIGN KEY (nric) references user_particulars (nric) ON DELETE CASCADE
 );
 
