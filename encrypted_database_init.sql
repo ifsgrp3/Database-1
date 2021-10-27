@@ -377,8 +377,6 @@ AS $$
       pgp_sym_encrypt(zip_code, 'mysecretkey'), 
       pgp_sym_encrypt(area, 'mysecretkey')
     );
-
-    INSERT INTO vaccination_results (nric, vaccination_status, vaccine_type, vaccination_centre_location, first_dose_date, second_dose_date) VALUES (nric, '0', null, null, null, null) RETURNING vaccination_certificate_id as curr_vaccination_certificate_id;
   END;
 $$ LANGUAGE plpgsql;
 
