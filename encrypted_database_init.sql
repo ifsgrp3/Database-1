@@ -50,7 +50,7 @@ AS $$
       IF (NEW.password_attempts > '9') THEN
         RAISE NOTICE 'User has exceed max login tries';  
       END IF;
-      OLD.account_status := pgp_sym_encrypt('0','Y61PAgMBAAE');
+      OLD.account_status := pgp_sym_encrypt('0','mysecretkey');
       RETURN NEW;
     END;
 $$ LANGUAGE plpgsql;
@@ -66,9 +66,9 @@ AS $$
   BEGIN
     INSERT INTO login_credentials (nric, hashed_password, user_salt, ble_serial_number,account_role) VALUES 
       (nric, hashed_password,  
-	    pgp_sym_encrypt(user_salt, 'Y61PAgMBAAE'),
- 	    pgp_sym_encrypt(ble_serial_number, 'Y61PAgMBAAE'),
- 	    pgp_sym_encrypt(account_role, 'Y61PAgMBAAE'));
+	    pgp_sym_encrypt(user_salt, 'mysecretkey'),
+ 	    pgp_sym_encrypt(ble_serial_number, 'mysecretkey'),
+ 	    pgp_sym_encrypt(account_role, 'mysecretkey'));
   END;
 $$ LANGUAGE plpgsql;
 
@@ -79,7 +79,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE PROCEDURE deactivate_account(update_nric char(9))
 AS $$
   UPDATE login_credentials
-  SET account_status = pgp_sym_encrypt('0','Y61PAgMBAAE')
+  SET account_status = pgp_sym_encrypt('0','mysecretkey')
   WHERE nric = update_nric;
 $$ LANGUAGE sql;
 
@@ -87,14 +87,14 @@ $$ LANGUAGE sql;
 CREATE OR REPLACE PROCEDURE update_user_password(update_nric char(9), new_hashed_password varchar )
 AS $$
   UPDATE login_credentials
-  SET hashed_password = pgp_sym_encrypt(new_hashed_password,'Y61PAgMBAAE')
+  SET hashed_password = pgp_sym_encrypt(new_hashed_password,'mysecretkey')
   WHERE nric = update_nric; 
 $$ LANGUAGE sql;
 
 CREATE OR REPLACE PROCEDURE update_user_ble(update_nric char(9), new_ble_serial_number varchar )
 AS $$
   UPDATE login_credentials
-  SET ble_serial_number = pgp_sym_encrypt(new_ble_serial_number ,'Y61PAgMBAAE')
+  SET ble_serial_number = pgp_sym_encrypt(new_ble_serial_number ,'mysecretkey')
   WHERE nric = update_nric; 
  
 $$ LANGUAGE sql;
@@ -103,7 +103,7 @@ $$ LANGUAGE sql;
 CREATE OR REPLACE PROCEDURE update_user_role(update_nric char(9), new_account_role varchar )
 AS $$
   UPDATE login_credentials
-  SET account_role = pgp_sym_encrypt(new_account_role,'Y61PAgMBAAE')
+  SET account_role = pgp_sym_encrypt(new_account_role,'mysecretkey')
   WHERE nric = update_nric;
 $$ LANGUAGE sql;
 
@@ -212,13 +212,13 @@ AS $$
   BEGIN
     INSERT INTO user_particulars VALUES
       (nric, 
-      pgp_sym_encrypt(first_name, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(last_name, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(date_of_birth, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(age, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(gender, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(race, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(contact_number, 'Y61PAgMBAAE'));
+      pgp_sym_encrypt(first_name, 'mysecretkey'), 
+      pgp_sym_encrypt(last_name, 'mysecretkey'), 
+      pgp_sym_encrypt(date_of_birth, 'mysecretkey'), 
+      pgp_sym_encrypt(age, 'mysecretkey'), 
+      pgp_sym_encrypt(gender, 'mysecretkey'), 
+      pgp_sym_encrypt(race, 'mysecretkey'), 
+      pgp_sym_encrypt(contact_number, 'mysecretkey'));
   END;
 $$ LANGUAGE plpgsql;
 
@@ -227,8 +227,8 @@ CREATE OR REPLACE PROCEDURE update_user_first_last_name(curr_nric char(9), new_l
 AS $$
   BEGIN 
     UPDATE user_particulars SET (last_name, first_name) = (
-      pgp_sym_encrypt(new_last_name, 'Y61PAgMBAAE'),
-      pgp_sym_encrypt(new_first_name, 'Y61PAgMBAAE')
+      pgp_sym_encrypt(new_last_name, 'mysecretkey'),
+      pgp_sym_encrypt(new_first_name, 'mysecretkey')
     ) WHERE nric = curr_nric;
   END;
 $$ LANGUAGE plpgsql; 
@@ -238,7 +238,7 @@ CREATE OR REPLACE PROCEDURE update_contact_number(curr_nric char(9), new_contact
 AS $$
   BEGIN
     UPDATE user_particulars SET contact_number = (
-      pgp_sym_encrypt(new_contact_number, 'Y61PAgMBAAE')
+      pgp_sym_encrypt(new_contact_number, 'mysecretkey')
     ) WHERE nric = curr_nric;
   END;
 $$ LANGUAGE plpgsql;
@@ -257,10 +257,10 @@ AS $$
   BEGIN
     INSERT INTO user_address(nric, street_name, unit_number, zip_code, area) VALUES
       (nric, 
-      pgp_sym_encrypt(street_name, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(unit_number, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(zip_code, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(area, 'Y61PAgMBAAE'));
+      pgp_sym_encrypt(street_name, 'mysecretkey'), 
+      pgp_sym_encrypt(unit_number, 'mysecretkey'), 
+      pgp_sym_encrypt(zip_code, 'mysecretkey'), 
+      pgp_sym_encrypt(area, 'mysecretkey'));
   END;
 $$ LANGUAGE plpgsql;
 
@@ -269,10 +269,10 @@ CREATE OR REPLACE PROCEDURE update_address(curr_nric char(9), new_street_name va
 AS $$ 
   BEGIN
     UPDATE user_address SET (street_name, unit_number, zip_code, area) = (
-      pgp_sym_encrypt(new_street_name, 'Y61PAgMBAAE'),
-      pgp_sym_encrypt(new_unit_number, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(new_zip_code, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(new_area, 'Y61PAgMBAAE')
+      pgp_sym_encrypt(new_street_name, 'mysecretkey'),
+      pgp_sym_encrypt(new_unit_number, 'mysecretkey'), 
+      pgp_sym_encrypt(new_zip_code, 'mysecretkey'), 
+      pgp_sym_encrypt(new_area, 'mysecretkey')
     ) WHERE nric = curr_nric;
   END;
 $$ LANGUAGE plpgsql;
@@ -285,11 +285,11 @@ AS $$
   BEGIN
     INSERT INTO vaccination_results (nric, vaccination_status, vaccine_type, vaccination_centre_location, first_dose_date, second_dose_date) VALUES (
       nric, 
-      pgp_sym_encrypt(vaccination_status, 'Y61PAgMBAAE'),
-      pgp_sym_encrypt(vaccine_type, 'Y61PAgMBAAE'),
-      pgp_sym_encrypt(vaccination_centre_location, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(first_dose_date, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(second_dose_date, 'Y61PAgMBAAE')
+      pgp_sym_encrypt(vaccination_status, 'mysecretkey'),
+      pgp_sym_encrypt(vaccine_type, 'mysecretkey'),
+      pgp_sym_encrypt(vaccination_centre_location, 'mysecretkey'), 
+      pgp_sym_encrypt(first_dose_date, 'mysecretkey'), 
+      pgp_sym_encrypt(second_dose_date, 'mysecretkey')
     ) RETURNING vaccination_certificate_id INTO curr_vaccination_certificate_id;
   END;
 $$ LANGUAGE plpgsql;
@@ -299,7 +299,7 @@ CREATE OR REPLACE PROCEDURE update_vaccination_status_to_partially(curr_nric cha
 AS $$
   BEGIN
     UPDATE vaccination_results SET vaccination_status = (
-      pgp_sym_encrypt('1', 'Y61PAgMBAAE')
+      pgp_sym_encrypt('1', 'mysecretkey')
     ) WHERE nric = curr_nric;
   END;
 $$ LANGUAGE plpgsql;
@@ -309,7 +309,7 @@ CREATE OR REPLACE PROCEDURE update_vaccination_status_to_fully(curr_nric char(9)
 AS $$
   BEGIN
      UPDATE vaccination_results SET vaccination_status = (
-      pgp_sym_encrypt('2', 'Y61PAgMBAAE')
+      pgp_sym_encrypt('2', 'mysecretkey')
     ) WHERE nric = curr_nric;
   END;
 $$ LANGUAGE plpgsql;
@@ -323,8 +323,8 @@ AS $$
   BEGIN
     INSERT INTO covid19_test_results(nric, covid19_test_type, test_result) VALUES (
       nric, 
-      pgp_sym_encrypt(covid19_test_type, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(test_result, 'Y61PAgMBAAE')
+      pgp_sym_encrypt(covid19_test_type, 'mysecretkey'), 
+      pgp_sym_encrypt(test_result, 'mysecretkey')
     ) RETURNING test_id INTO curr_test_id;
   END;
 $$ LANGUAGE plpgsql;
@@ -337,8 +337,8 @@ AS $$
   BEGIN
     INSERT INTO health_declaration (nric, covid_symptoms, temperature) VALUES (
       nric,
-      pgp_sym_encrypt(covid_symptoms, 'Y61PAgMBAAE'),
-      pgp_sym_encrypt(temperature, 'Y61PAgMBAAE')
+      pgp_sym_encrypt(covid_symptoms, 'mysecretkey'),
+      pgp_sym_encrypt(temperature, 'mysecretkey')
     ) RETURNING health_declaration_id INTO curr_health_declaration_id;
   END;
 $$ LANGUAGE plpgsql;
@@ -361,21 +361,21 @@ AS $$
   BEGIN
     INSERT INTO user_particulars (nric, first_name, last_name, date_of_birth, age, gender, race, contact_number) VALUES (
       nric,
-      pgp_sym_encrypt(first_name, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(last_name, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(date_of_birth, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(age, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(gender, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(race, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(contact_number, 'Y61PAgMBAAE')
+      pgp_sym_encrypt(first_name, 'mysecretkey'), 
+      pgp_sym_encrypt(last_name, 'mysecretkey'), 
+      pgp_sym_encrypt(date_of_birth, 'mysecretkey'), 
+      pgp_sym_encrypt(age, 'mysecretkey'), 
+      pgp_sym_encrypt(gender, 'mysecretkey'), 
+      pgp_sym_encrypt(race, 'mysecretkey'), 
+      pgp_sym_encrypt(contact_number, 'mysecretkey')
     );
 
     INSERT INTO user_address(nric, street_name, unit_number, zip_code, area) VALUES (
       nric, 
-      pgp_sym_encrypt(street_name, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(unit_number, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(zip_code, 'Y61PAgMBAAE'), 
-      pgp_sym_encrypt(area, 'Y61PAgMBAAE')
+      pgp_sym_encrypt(street_name, 'mysecretkey'), 
+      pgp_sym_encrypt(unit_number, 'mysecretkey'), 
+      pgp_sym_encrypt(zip_code, 'mysecretkey'), 
+      pgp_sym_encrypt(area, 'mysecretkey')
     );
   END;
 $$ LANGUAGE plpgsql;
