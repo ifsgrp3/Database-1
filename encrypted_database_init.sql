@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS account_logs (
 );
 
 CREATE TABLE IF NOT EXISTS online_users(
-	nric char(9) references login_credentials (nric)
+	nric char(9) references login_credentials (nric),
+	iv varchar
 );
 
 /** Function to add online users **/
