@@ -31,9 +31,9 @@ CREATE TABLE IF NOT EXISTS online_users(
 );
 
 /** Function to add online users **/
-CREATE OR REPLACE PROCEDURE add_online_user(new_nric char(9))
+CREATE OR REPLACE PROCEDURE add_online_user(new_nric char(9),new_iv varchar)
 AS $$
-  INSERT INTO  online_users (nric) VALUES (new_nric);
+  INSERT INTO  online_users (nric,iv) VALUES (new_nric,new_iv);
 $$ LANGUAGE sql;
 
 
